@@ -1,14 +1,35 @@
-# RepoScan
+<p align="center">
+  <h1 align="center">RepoScan</h1>
+  <p align="center">GitHub repository analytics from your terminal.</p>
+  <p align="center">
+    <a href="https://pypi.org/project/reposcan/"><img src="https://img.shields.io/pypi/v/reposcan?color=blue&label=PyPI" alt="PyPI"></a>
+    <a href="https://pypi.org/project/reposcan/"><img src="https://img.shields.io/pypi/pyversions/reposcan" alt="Python"></a>
+    <a href="https://github.com/shazeus/reposcan/blob/main/LICENSE"><img src="https://img.shields.io/github/license/shazeus/reposcan" alt="License"></a>
+    <a href="https://github.com/shazeus/reposcan/stargazers"><img src="https://img.shields.io/github/stars/shazeus/reposcan?style=social" alt="Stars"></a>
+  </p>
+</p>
 
-GitHub repository analytics from your terminal. Analyze any public repo in seconds — commit patterns, contributor stats, language breakdown, file hotspots, and a health score, all in a clean terminal UI.
+---
 
-## Install
+Analyze any public GitHub repository in seconds — commit patterns, contributor stats, language breakdown, file hotspots, and a health score, all in a clean terminal UI.
+
+- **Repository Overview** — stars, forks, watchers, license, topics, and size
+- **Commit Activity** — by day, hour, and author with bar charts
+- **Health Score** — weighted 0–100 rating based on activity, docs, and community
+- **File Churn** — most frequently changed files across recent commits
+- **Language Breakdown** — byte count and percentage per language
+- **Issue Statistics** — open vs closed, average close time, top labels
+- **Repo Comparison** — side-by-side table for multiple repositories
+
+## Installation
 
 ```bash
 pip install reposcan
 ```
 
-## Quick Start
+Requires Python 3.8+. Works on Linux, macOS, and Windows.
+
+## Usage
 
 ```bash
 # Full analysis of any public repo
@@ -21,7 +42,13 @@ reposcan overview facebook/react
 reposcan health golang/go
 
 # Compare multiple repos side by side
-reposcan compare "pallets/flask,django/django,fastapi/tiangolo"
+reposcan compare "pallets/flask,django/django"
+
+# File hotspot analysis
+reposcan churn rust-lang/rust
+
+# Language breakdown
+reposcan languages shazeus/reposcan
 ```
 
 ## Commands
@@ -31,7 +58,7 @@ reposcan compare "pallets/flask,django/django,fastapi/tiangolo"
 | `reposcan analyze <repo>` | Full repository report |
 | `reposcan overview <repo>` | Basic repo info (stars, forks, license, etc.) |
 | `reposcan commits <repo>` | Commit activity breakdown (by day, hour, author) |
-| `reposcan health <repo>` | Repository health score (0-100) |
+| `reposcan health <repo>` | Repository health score (0–100) |
 | `reposcan churn <repo>` | File hotspots — most frequently changed files |
 | `reposcan languages <repo>` | Language breakdown with percentages |
 | `reposcan compare <repos>` | Side-by-side comparison of multiple repos |
@@ -39,90 +66,48 @@ reposcan compare "pallets/flask,django/django,fastapi/tiangolo"
 
 `<repo>` accepts both `owner/repo` format and full GitHub URLs.
 
-## Options
+## Configuration
+
+### GitHub Token
+
+Without a token you get **60 requests/hour**. With a token you get **5,000 requests/hour**.
+
+```bash
+# Set as environment variable (recommended)
+export GITHUB_TOKEN=ghp_your_token_here
+
+# Or pass directly
+reposcan --token ghp_xxxx analyze owner/repo
+```
+
+Generate a token at [github.com/settings/tokens](https://github.com/settings/tokens) — no special scopes needed for public repos.
+
+### Options
 
 ```bash
 # Include file churn in full analysis (makes extra API calls)
 reposcan analyze owner/repo --churn
 
-# Get JSON output instead of tables
-reposcan analyze owner/repo --json-output
-
-# Use a GitHub token for higher rate limits
-reposcan --token ghp_xxxx analyze owner/repo
-
-# Or set it as an environment variable
-export GITHUB_TOKEN=ghp_xxxx
-```
-
-## What It Analyzes
-
-### Repository Overview
-Stars, forks, watchers, open issues, license, topics, creation date, last push, and size.
-
-### Commit Activity
-- Total commits analyzed
-- Commits by day of week (with bar chart)
-- Peak commit hours (UTC)
-- Top committers
-- Current commit streak
-
-### Health Score (0-100)
-A weighted score based on:
-- Has description (+15)
-- Has license (+15)
-- Has topics (+10)
-- Recent activity within 30 days (+20) or 90 days (+10)
-- Contributor count (+5 to +15)
-- Star count (+5 to +15)
-- Open issue ratio (+5 to +10)
-
-### File Churn / Hotspots
-The most frequently modified files across recent commits — helps identify areas of high change that may need refactoring or extra test coverage.
-
-### Language Breakdown
-Byte count and percentage for each language detected by GitHub.
-
-### Issue Statistics
-Open vs closed counts, average close time, and most used labels.
-
-### Repo Comparison
-Compare stars, forks, issues, language, health score, and last push date across multiple repos in one table.
-
-## GitHub API Rate Limits
-
-Without a token, you get **60 requests/hour**. With a token, you get **5,000 requests/hour**.
-
-Generate a personal access token at [github.com/settings/tokens](https://github.com/settings/tokens) — no special scopes needed for public repos.
-
-```bash
-export GITHUB_TOKEN=ghp_your_token_here
-```
-
-## Examples
-
-```bash
-# Analyze your own repo
-reposcan analyze shazeus/reposcan
-
-# Deep dive into commit patterns
-reposcan commits rust-lang/rust
-
-# Check if a dependency is well maintained
-reposcan health some-org/some-library
-
-# Compare web frameworks
-reposcan compare "pallets/flask,django/django"
-
-# Pipe JSON to other tools
+# Get JSON output for piping to other tools
 reposcan analyze owner/repo --json-output | jq '.health.score'
 ```
 
-## Requirements
+## Health Score
 
-- Python 3.8+
-- Works on Linux, macOS, and Windows
+A weighted score (0–100) based on:
+
+| Check | Points |
+|-------|--------|
+| Has description | +15 |
+| Has license | +15 |
+| Has topics | +10 |
+| Active within 30 days | +20 |
+| Active within 90 days | +10 |
+| 5+ contributors | +15 |
+| 2+ contributors | +10 |
+| 100+ stars | +15 |
+| Low open issue ratio | +10 |
 
 ## License
 
-MIT
+[MIT](LICENSE)
