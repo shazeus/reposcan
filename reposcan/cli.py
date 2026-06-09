@@ -28,7 +28,11 @@ def parse_repo(repo_str):
 
 @click.group()
 @click.version_option(version=__version__, prog_name="reposcan")
-@click.option("--token", envvar="GITHUB_TOKEN", help="GitHub personal access token")
+@click.option(
+    "--token",
+    envvar=["GH_TOKEN", "GITHUB_TOKEN"],
+    help="GitHub personal access token",
+)
 @click.pass_context
 def cli(ctx, token):
     """RepoScan - GitHub repository analytics from your terminal."""
@@ -191,5 +195,5 @@ def rate_limit(ctx):
     reset_time = datetime.fromtimestamp(core["reset"], tz=timezone.utc)
     console.print(f"  Resets at: {reset_time.strftime('%H:%M:%S UTC')}")
     if not ctx.obj["client"].token:
-        console.print("  [yellow]Tip: Set GITHUB_TOKEN for 5000 req/hr instead of 60[/]")
+        console.print("  [yellow]Tip: Set GH_TOKEN or GITHUB_TOKEN for 5000 req/hr instead of 60[/]")
     console.print()

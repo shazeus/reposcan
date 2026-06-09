@@ -74,6 +74,9 @@ Without a token you get **60 requests/hour**. With a token you get **5,000 reque
 
 ```bash
 # Set as environment variable (recommended)
+export GH_TOKEN=ghp_your_token_here
+
+# Backward-compatible alternative
 export GITHUB_TOKEN=ghp_your_token_here
 
 # Or pass directly

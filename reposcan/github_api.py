@@ -11,7 +11,7 @@ class GitHubClient:
     BASE_URL = "https://api.github.com"
 
     def __init__(self, token=None):
-        self.token = token or os.environ.get("GITHUB_TOKEN")
+        self.token = token or os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
         self.session = requests.Session()
         self.session.headers.update({
             "Accept": "application/vnd.github.v3+json",
@@ -24,7 +24,7 @@ class GitHubClient:
         url = f"{self.BASE_URL}{endpoint}"
         resp = self.session.get(url, params=params)
         if resp.status_code == 403 and "rate limit" in resp.text.lower():
-            print("GitHub API rate limit exceeded. Set GITHUB_TOKEN for higher limits.")
+            print("GitHub API rate limit exceeded. Set GH_TOKEN or GITHUB_TOKEN for higher limits.")
             sys.exit(1)
         if resp.status_code == 404:
             print(f"Repository not found: {endpoint}")
