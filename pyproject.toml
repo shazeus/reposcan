@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "reposcan"
-version = "0.1.1"
+version = "0.1.2"
 description = "GitHub repository analytics from your terminal"
 readme = "README.md"
 license = "MIT"

@@ -1,4 +1,5 @@
 from click.testing import CliRunner
+import requests
 
 from reposcan.cli import cli
 from reposcan.github_api import GitHubClient
@@ -32,3 +33,18 @@ def test_client_prefers_gh_token_env(monkeypatch):
     client = GitHubClient()
 
     assert client.token == "gh-token"
+
+
+def test_client_exits_cleanly_on_request_error(monkeypatch):
+    client = GitHubClient(token="gh-token")
+
+    def fail(*args, **kwargs):
+        raise requests.ConnectionError("boom")
+
+    monkeypatch.setattr(client.session, "get", fail)
+    monkeypatch.setattr("reposcan.cli.GitHubClient", lambda token=None: client)
+
+    result = CliRunner().invoke(cli, ["--token", "gh-token", "rate-limit"])
+
+    assert result.exit_code == 1
+    assert "GitHub API request failed: boom" in result.output

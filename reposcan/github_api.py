@@ -22,7 +22,11 @@ class GitHubClient:
 
     def _get(self, endpoint, params=None):
         url = f"{self.BASE_URL}{endpoint}"
-        resp = self.session.get(url, params=params)
+        try:
+            resp = self.session.get(url, params=params, timeout=20)
+        except requests.RequestException as exc:
+            print(f"GitHub API request failed: {exc}")
+            sys.exit(1)
         if resp.status_code == 403 and "rate limit" in resp.text.lower():
             print("GitHub API rate limit exceeded. Set GH_TOKEN or GITHUB_TOKEN for higher limits.")
             sys.exit(1)
