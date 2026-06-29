@@ -1,5 +1,6 @@
 """GitHub API client for RepoScan."""
 
+import json
 import os
 import sys
 from datetime import datetime, timezone
@@ -12,6 +13,7 @@ class GitHubClient:
 
     def __init__(self, token=None):
         self.token = token or os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+        self.json_errors = False
         self.session = requests.Session()
         self.session.headers.update({
             "Accept": "application/vnd.github.v3+json",
@@ -20,19 +22,26 @@ class GitHubClient:
         if self.token:
             self.session.headers["Authorization"] = f"token {self.token}"
 
+    def _exit_error(self, message, error_type="api_error"):
+        if self.json_errors:
+            print(json.dumps({"error": {"type": error_type, "message": message}}, indent=2))
+        else:
+            print(message)
+        sys.exit(1)
+
     def _get(self, endpoint, params=None):
         url = f"{self.BASE_URL}{endpoint}"
         try:
             resp = self.session.get(url, params=params, timeout=20)
         except requests.RequestException as exc:
-            print(f"GitHub API request failed: {exc}")
-            sys.exit(1)
+            self._exit_error(f"GitHub API request failed: {exc}", error_type="request_error")
         if resp.status_code == 403 and "rate limit" in resp.text.lower():
-            print("GitHub API rate limit exceeded. Set GH_TOKEN or GITHUB_TOKEN for higher limits.")
-            sys.exit(1)
+            self._exit_error(
+                "GitHub API rate limit exceeded. Set GH_TOKEN or GITHUB_TOKEN for higher limits.",
+                error_type="rate_limit",
+            )
         if resp.status_code == 404:
-            print(f"Repository not found: {endpoint}")
-            sys.exit(1)
+            self._exit_error(f"Repository not found: {endpoint}", error_type="not_found")
         resp.raise_for_status()
         return resp.json()
 

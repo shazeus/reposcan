@@ -1,4 +1,5 @@
 from click.testing import CliRunner
+import json
 import requests
 
 from reposcan.cli import cli
@@ -48,3 +49,31 @@ def test_client_exits_cleanly_on_request_error(monkeypatch):
 
     assert result.exit_code == 1
     assert "GitHub API request failed: boom" in result.output
+
+
+def test_analyze_json_output_emits_json_error_on_rate_limit(monkeypatch):
+    client = GitHubClient(token="gh-token")
+
+    class DummyResponse:
+        status_code = 403
+        text = "API rate limit exceeded"
+
+        def raise_for_status(self):
+            raise AssertionError("raise_for_status should not run for rate-limit errors")
+
+    monkeypatch.setattr(client.session, "get", lambda *args, **kwargs: DummyResponse())
+    monkeypatch.setattr("reposcan.cli.GitHubClient", lambda token=None: client)
+
+    result = CliRunner().invoke(
+        cli,
+        ["--token", "gh-token", "analyze", "shazeus/depstree", "--json-output"],
+    )
+
+    assert result.exit_code == 1
+    payload = json.loads(result.output)
+    assert payload == {
+        "error": {
+            "type": "rate_limit",
+            "message": "GitHub API rate limit exceeded. Set GH_TOKEN or GITHUB_TOKEN for higher limits.",
+        }
+    }

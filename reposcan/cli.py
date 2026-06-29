@@ -50,6 +50,7 @@ def analyze(ctx, repo, churn, as_json):
 
     REPO can be 'owner/repo' or a full GitHub URL.
     """
+    ctx.obj["client"].json_errors = as_json
     owner, repo_name = parse_repo(repo)
     client = ctx.obj["client"]
     analyzer = RepoAnalyzer(client, owner, repo_name)
