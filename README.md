@@ -93,6 +93,7 @@ reposcan analyze owner/repo --churn
 
 # Get JSON output for piping to other tools
 reposcan analyze owner/repo --json-output | jq '.health.score'
+reposcan rate-limit --json-output | jq '.remaining'
 ```
 
 ## Health Score

@@ -27,6 +27,23 @@ def test_rate_limit_accepts_gh_token_env(monkeypatch):
     assert DummyClient.last_token == "gh-token"
 
 
+def test_rate_limit_json_output(monkeypatch):
+    import reposcan.cli as cli_module
+
+    monkeypatch.setattr(cli_module, "GitHubClient", DummyClient)
+    result = CliRunner().invoke(cli, ["--token", "gh-token", "rate-limit", "--json-output"])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload == {
+        "resource": "core",
+        "remaining": 5000,
+        "limit": 5000,
+        "reset": 0,
+        "authenticated": True,
+    }
+
+
 def test_client_prefers_gh_token_env(monkeypatch):
     monkeypatch.setenv("GH_TOKEN", "gh-token")
     monkeypatch.setenv("GITHUB_TOKEN", "legacy-token")

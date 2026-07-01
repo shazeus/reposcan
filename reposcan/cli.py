@@ -183,12 +183,29 @@ def compare(ctx, repo, limit):
 
 
 @cli.command(name="rate-limit")
+@click.option("--json-output", "as_json", is_flag=True, help="Output as JSON")
 @click.pass_context
-def rate_limit(ctx):
+def rate_limit(ctx, as_json):
     """Check GitHub API rate limit status."""
     client = ctx.obj["client"]
+    client.json_errors = as_json
     data = client.get_rate_limit()
     core = data["resources"]["core"]
+
+    if as_json:
+        click.echo(
+            json.dumps(
+                {
+                    "resource": "core",
+                    "remaining": core["remaining"],
+                    "limit": core["limit"],
+                    "reset": core["reset"],
+                    "authenticated": bool(client.token),
+                },
+                indent=2,
+            )
+        )
+        return
 
     console.print(f"\n[bold]GitHub API Rate Limit[/]")
     console.print(f"  Remaining: [{'green' if core['remaining'] > 100 else 'red'}]{core['remaining']}[/] / {core['limit']}")
